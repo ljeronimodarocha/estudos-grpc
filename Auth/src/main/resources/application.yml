@@ -1,14 +1,15 @@
 spring:
   grpc:
+    server:
+      port: 9090
     client:
       channels:
-        usuarioService:
-          address: "static://localhost:9091"
-          secure: false
+        usuarios-service:
+          address: "localhost:9091"
   datasource:
     url: jdbc:postgresql://localhost:5432/authentication_db
-    username: your_username
-    password: your_password
+    username: authuser
+    password: authpass
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -20,16 +21,13 @@ spring:
     console:
       enabled: true
       path: /h2-console
-  profiles:
-    active: dev
 server:
   port: 8082
-  server:
-    port: 50052
+
 jwt:
-  secret-key: your-secret-key
   token-validity-seconds: 3600
   refresh-token-validity-seconds: 86400
+  secret-key: 401e12f35a6b8c7d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d
 
 cache:
   redis:
@@ -39,3 +37,4 @@ cache:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.grpc: TRACE

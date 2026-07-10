@@ -22,14 +22,15 @@ public class UserService {
     }
 
     public User registerUser(RegisterRequest request) {
-        if (userRepository.existsByName(request.name())) {
+      /*  if (userRepository.existsByName(request.name())) {
             throw new IllegalArgumentException("Username already exists");
         }
         if (userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Email already exists");
-        }
+        }*/
 
         User user = User.builder()
+                .name(request.name())
                 .email(request.email())
                 .displayName(request.displayName())
                 .enabled(true)

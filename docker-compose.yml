@@ -32,6 +32,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  postgres3:
+    image: postgres:16
+    container_name: user-postgres
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: authpass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data3:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U authuser -d user_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -49,4 +65,5 @@ services:
 volumes:
   postgres_data:
   postgres_data2:
+  postgres_data3:
   redis_data:

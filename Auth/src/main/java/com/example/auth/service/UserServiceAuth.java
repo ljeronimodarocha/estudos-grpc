@@ -34,7 +34,7 @@ public class UserServiceAuth implements UserDetailsService {
                 .build();
     }
 
-    public UserAuthentication registerUserAuthentication(RegisterRequest request) {
+    public UserAuthentication registerUserAuthentication(RegisterRequest request, Long userId) {
         if (userRepositoryAuthentication.existsByUsername(request.username())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -42,6 +42,7 @@ public class UserServiceAuth implements UserDetailsService {
         UserAuthentication userAuthentication = UserAuthentication.builder()
                 .username(request.username())
                 .password(passwordEncoder.encode(request.password()))
+                .userId(userId)
                 .build();
 
         return userRepositoryAuthentication.save(userAuthentication);

@@ -1,6 +1,7 @@
 package com.example.auth.grpc;
 
 import com.example.auth.service.AuthService;
+import com.example.grpc.auth.*;
 import io.grpc.stub.StreamObserver;
 import lombok.AllArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;

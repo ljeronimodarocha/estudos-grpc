@@ -1,5 +1,9 @@
 package com.example.user.grpc;
 
+import com.example.grpc.user.GetUserByIdRequest;
+import com.example.grpc.user.RegisterRequest;
+import com.example.grpc.user.UserResponse;
+import com.example.grpc.user.UserServiceGrpc;
 import com.example.user.model.User;
 import com.example.user.service.UserService;
 import io.grpc.stub.StreamObserver;
@@ -15,7 +19,9 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void register(RegisterRequest request, StreamObserver<UserResponse> responseObserver) {
         com.example.user.dto.RegisterRequest registerRequest =
-                new com.example.user.dto.RegisterRequest(request.getUsername(), request.getEmail(), request.getDisplayName());
+                new com.example.user.dto.RegisterRequest(request.getUsername(),
+                        request.getEmail(),
+                        request.getDisplayName());
         User user = userService.registerUser(registerRequest);
         UserResponse response = UserResponse.newBuilder()
                 .setId(user.getId().intValue())

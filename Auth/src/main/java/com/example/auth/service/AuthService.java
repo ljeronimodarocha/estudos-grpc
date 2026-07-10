@@ -4,7 +4,8 @@ import com.example.auth.dto.*;
 import com.example.auth.model.Token;
 import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
-import com.example.user.grpc.UserServiceGrpc;
+import com.example.grpc.user.UserResponse;
+import com.example.grpc.user.UserServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final long accessTokenValiditySeconds;
     private final long refreshTokenValiditySeconds;
-    private final UserServiceGrpc.UserServiceBlockingStub usuarioStub;
+    private final UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
 
     public AuthService(
             AuthenticationManager authenticationManager,
@@ -28,7 +29,8 @@ public class AuthService {
             TokenService tokenService,
             JwtUtil jwtUtil,
             @Value("${jwt.token-validity-seconds}") long accessTokenValiditySeconds,
-            @Value("${jwt.refresh-token-validity-seconds}") long refreshTokenValiditySeconds, UserServiceGrpc.UserServiceBlockingStub usuarioStub
+            @Value("${jwt.refresh-token-validity-seconds}") long refreshTokenValiditySeconds,
+            UserServiceGrpc.UserServiceBlockingStub userGrpcStub
     ) {
         this.authenticationManager = authenticationManager;
         this.userServiceAuth = userServiceAuth;
@@ -36,7 +38,7 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
         this.accessTokenValiditySeconds = accessTokenValiditySeconds;
         this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
-        this.usuarioStub = usuarioStub;
+        this.userGrpcStub = userGrpcStub;
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -56,7 +58,15 @@ public class AuthService {
     }
 
     public AuthResponse register(RegisterRequest request) {
-        UserAuthentication userAuthentication = userServiceAuth.registerUserAuthentication(request);
+        com.example.grpc.user.RegisterRequest userRequest = com.example.grpc.user.RegisterRequest.newBuilder()
+                .setUsername(request.username())
+                .setEmail(request.email())
+                .setDisplayName(request.displayName())
+                .build();
+
+        UserResponse registered = userGrpcStub.register(userRequest);
+
+        UserAuthentication userAuthentication = userServiceAuth.registerUserAuthentication(request, (long) registered.getId());
         UserDetails userDetails = userServiceAuth.loadUserByUsername(userAuthentication.getUsername());
 
         String accessToken = jwtUtil.generateAccessToken(userDetails);

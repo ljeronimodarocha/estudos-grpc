@@ -5,7 +5,7 @@ spring:
     server:
       port: 9091
   datasource:
-    url: jdbc:postgresql://localhost:5432/authentication_db
+    url: jdbc:postgresql://localhost:5434/user_db
     username: authuser
     password: authpass
     driver-class-name: org.postgresql.Driver

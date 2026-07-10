@@ -1,4 +1,4 @@
 package com.example.auth.dto;
 
-public record RegisterRequest(String username, String password, String UserID) {
+public record RegisterRequest(String username, String password, String email, String displayName) {
 }

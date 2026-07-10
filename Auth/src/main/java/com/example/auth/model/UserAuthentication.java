@@ -6,8 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "users")
+@Entity(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,7 +32,7 @@ public class UserAuthentication {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    private String userId;
+    private Long userId;
 
     @PrePersist
     protected void onCreate() {
