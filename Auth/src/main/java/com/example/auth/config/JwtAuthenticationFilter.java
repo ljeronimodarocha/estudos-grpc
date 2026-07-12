@@ -32,6 +32,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        String path = request.getRequestURI();
+        
+        // Ignora endpoints públicos (não requerem autenticação)
+        if (path.contains("/auth/register") || 
+            path.contains("/h2-console/") ||
+            path.contains("/auth/login") ||
+            path.contains("/auth/refresh") ||
+            path.contains("/auth/logout") ||
+            path.contains("/auth/validate")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

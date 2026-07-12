@@ -1,6 +1,6 @@
-package com.example.user.config;
+package com.example.bookapp.config;
 
-import com.example.user.filter.JwtValidationFilter;
+import com.example.bookapp.filter.JwtValidationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,12 +24,11 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Registro público (via gRPC)
-                .requestMatchers("/users").permitAll()
-                .requestMatchers("/users/**").permitAll()
-                // Endpoints protegidos
-                .requestMatchers("/users/me").authenticated()
-                .requestMatchers("/users/{id}").authenticated()
+                // Endpoints públicos
+                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                // Endpoints protegidos - TODOS exigem autenticação
+                .requestMatchers("/api/books/**").authenticated()
                 .anyRequest().authenticated()
             )
             // Filtro JWT via gRPC

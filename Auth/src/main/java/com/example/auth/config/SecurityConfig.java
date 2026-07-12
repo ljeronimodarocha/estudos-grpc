@@ -27,12 +27,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
+                        // Endpoints públicos
+                        .requestMatchers("/auth/register", "/h2-console/**").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/logout").permitAll()
+                        .requestMatchers("/auth/validate/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        // Endpoints protegidos
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))

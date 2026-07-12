@@ -1,17 +1,19 @@
 package com.example.auth.grpc;
 
 import com.example.auth.service.AuthService;
+import com.example.auth.util.JwtUtil;
 import com.example.grpc.auth.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
 
 @GrpcService
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void login(LoginRequest request, StreamObserver<AuthResponse> responseObserver) {
@@ -53,6 +55,24 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
 
     @Override
     public void validate(ValidateTokenRequest request, StreamObserver<ValidateResponse> responseObserver) {
-        super.validate(request, responseObserver);
+        try {
+            String token = request.getToken();
+            if (jwtUtil.validateToken(token)) {
+                String username = jwtUtil.getUsernameFromToken(token);
+                ValidateResponse response = ValidateResponse.newBuilder()
+                    .setValid(true)
+                    .setUsername(username)
+                    .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            } else {
+                Status status = Status.UNAUTHENTICATED
+                    .withDescription("Token inválido ou expirado");
+                responseObserver.onError(status.asRuntimeException());
+            }
+        } catch (Exception e) {
+            Status status = Status.INTERNAL.withDescription("Erro ao validar token: " + e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+        }
     }
 }

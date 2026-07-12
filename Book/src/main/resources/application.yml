@@ -13,12 +13,18 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
   h2:
     console:
       enabled: true
       path: /h2-console
   profiles:
     active: dev
+  grpc:
+    client:
+      channels:
+        auth-service:
+          address: "localhost:9090"
 
 jwt:
   secret-key: your-secret-key
@@ -33,3 +39,4 @@ cache:
 logging:
   level:
     org.springframework.security: DEBUG
+    com.example.bookapp: DEBUG

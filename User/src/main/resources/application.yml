@@ -2,9 +2,6 @@ server:
   port: 8083
 
 spring:
-  grpc:
-    server:
-      port: 9091
   datasource:
     url: jdbc:postgresql://localhost:5432/authentication_db
     username: your_username
@@ -16,12 +13,21 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
   h2:
     console:
       enabled: true
       path: /h2-console
   profiles:
     active: dev
+  grpc:
+    server:
+      port: 9091
+    client:
+      channels:
+        auth-service:
+          address: "localhost:9090"
+
 jwt:
   secret-key: your-secret-key
   token-validity-seconds: 3600
@@ -35,3 +41,4 @@ cache:
 logging:
   level:
     org.springframework.security: DEBUG
+    com.example.user: DEBUG
