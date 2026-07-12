@@ -6,6 +6,7 @@ import com.example.grpc.user.UserResponse;
 import com.example.grpc.user.UserServiceGrpc;
 import com.example.user.model.User;
 import com.example.user.service.UserService;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.AllArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
@@ -18,19 +19,24 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void register(RegisterRequest request, StreamObserver<UserResponse> responseObserver) {
-        com.example.user.dto.RegisterRequest registerRequest =
-                new com.example.user.dto.RegisterRequest(request.getUsername(),
-                        request.getEmail(),
-                        request.getDisplayName());
-        User user = userService.registerUser(registerRequest);
-        UserResponse response = UserResponse.newBuilder()
-                .setId(user.getId().intValue())
-                .setName(user.getName())
-                .setDisplayName(user.getDisplayName())
-                .setEmail(user.getEmail())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        try {
+            com.example.user.dto.RegisterRequest registerRequest =
+                    new com.example.user.dto.RegisterRequest(request.getUsername(),
+                            request.getEmail(),
+                            request.getDisplayName());
+            User user = userService.registerUser(registerRequest);
+            UserResponse response = UserResponse.newBuilder()
+                    .setId(user.getId().intValue())
+                    .setName(user.getName())
+                    .setDisplayName(user.getDisplayName())
+                    .setEmail(user.getEmail())
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Status status = Status.INTERNAL.withDescription("Erro interno no servidor: " + e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+        }
     }
 
     @Override
