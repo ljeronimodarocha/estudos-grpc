@@ -1,5 +1,8 @@
 package com.example.bookapp.filter;
 
+import com.example.bookapp.config.GrpcClientFactory;
+import com.example.grpc.auth.*;
+import io.grpc.Status;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +20,11 @@ import java.io.IOException;
 @Component
 public class JwtValidationFilter extends OncePerRequestFilter {
     
+    private final GrpcClientFactory grpcClientFactory;
     private final UserDetailsService userDetailsService;
     
-    public JwtValidationFilter(UserDetailsService userDetailsService) {
+    public JwtValidationFilter(GrpcClientFactory grpcClientFactory, UserDetailsService userDetailsService) {
+        this.grpcClientFactory = grpcClientFactory;
         this.userDetailsService = userDetailsService;
     }
     
@@ -30,6 +35,13 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         
         String authHeader = request.getHeader("Authorization");
+        String path = request.getRequestURI();
+        
+        // Endpoints públicos (permitAll) - ajustar conforme necessário
+        if (path.matches("/actuator/**") || path.matches("/h2-console/**")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -37,25 +49,35 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         }
         
         String token = authHeader.substring(7);
-        String username = null;
         
-        // TODO: Validar token via gRPC no Auth quando o código gRPC for gerado
-        // Por enquanto, apenas logamos o token
-        // Em produção: chamar Auth via gRPC para validar o token
-        
-        // Simulação - substituir por validação real via gRPC
-        // Isso é apenas para compilar até o gRPC ser gerado
-        if (token != null && !token.isEmpty()) {
-            // Simulação de username extraído do token
-            username = "user_from_token";
-        }
-        
-        if (username != null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        // Validar token via gRPC no Auth
+        try {
+            AuthServiceGrpc.AuthServiceBlockingStub stub = grpcClientFactory.getAuthServiceBlockingStub();
+            ValidateTokenRequest validateRequest = ValidateTokenRequest.newBuilder()
+                .setToken(token)
+                .build();
+            
+            ValidateResponse validateResponse = stub.validate(validateRequest);
+            
+            if (validateResponse.getValid()) {
+                String username = validateResponse.getUsername();
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                
+                UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
+                return;
+            }
+            
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
+                "Erro ao validar token: " + e.getMessage());
+            return;
         }
         
         filterChain.doFilter(request, response);

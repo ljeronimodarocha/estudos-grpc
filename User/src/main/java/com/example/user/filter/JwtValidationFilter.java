@@ -1,7 +1,7 @@
 package com.example.user.filter;
 
+import com.example.user.config.GrpcClientFactory;
 import com.example.grpc.auth.*;
-import io.grpc.Status;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +19,11 @@ import java.io.IOException;
 @Component
 public class JwtValidationFilter extends OncePerRequestFilter {
     
+    private final GrpcClientFactory grpcClientFactory;
     private final UserDetailsService userDetailsService;
     
-    public JwtValidationFilter(UserDetailsService userDetailsService) {
+    public JwtValidationFilter(GrpcClientFactory grpcClientFactory, UserDetailsService userDetailsService) {
+        this.grpcClientFactory = grpcClientFactory;
         this.userDetailsService = userDetailsService;
     }
     
@@ -47,19 +49,28 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         
         String token = authHeader.substring(7);
         
-        // Validar via gRPC no Auth
+        // Validar token via gRPC no Auth
         try {
-            // Validação simplificada - em produção usar gRPC real
-            // Aqui validamos localmente usando JwtUtil do Auth
-            // Para usar gRPC real, será necessário gerar o código gRPC
+            AuthServiceGrpc.AuthServiceBlockingStub stub = grpcClientFactory.getAuthServiceBlockingStub();
+            ValidateTokenRequest validateRequest = ValidateTokenRequest.newBuilder()
+                .setToken(token)
+                .build();
             
-            // Simulação de chamada gRPC - substituir por chamada real quando gRPC for gerado
-            // AuthServiceGrpc.AuthServiceStub stub = AuthServiceGrpc.newStub(channel);
-            // ValidateTokenRequest request = ValidateTokenRequest.newBuilder().setToken(token).build();
-            // ValidateTokenResponse response = stub.validate(request);
+            ValidateResponse validateResponse = stub.validate(validateRequest);
             
-            // Por enquanto, apenas logamos a intenção de validar
-            // Em produção: validar token via gRPC no Auth
+            if (validateResponse.getValid()) {
+                String username = validateResponse.getUsername();
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                
+                UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
+                return;
+            }
             
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

@@ -1,4 +1,4 @@
-package com.example.bookapp.config;
+package com.example.user.config;
 
 import com.example.grpc.auth.AuthServiceGrpc;
 import io.grpc.ManagedChannel;
