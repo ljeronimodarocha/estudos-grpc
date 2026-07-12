@@ -2,6 +2,7 @@ package com.example.auth.grpc;
 
 import com.example.auth.service.AuthService;
 import com.example.grpc.auth.*;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.AllArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
@@ -14,20 +15,25 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
 
     @Override
     public void login(LoginRequest request, StreamObserver<AuthResponse> responseObserver) {
-        com.example.auth.dto.LoginRequest loginRequest = new com.example.auth.dto.LoginRequest(
-                request.getUsername(),
-                request.getPassword()
-        );
-        com.example.auth.dto.AuthResponse authResponse = authService.login(loginRequest);
-        AuthResponse response = AuthResponse.newBuilder()
-                .setAccessToken(authResponse.accessToken())
-                .setRefreshToken(authResponse.refreshToken())
-                .setTokenType(authResponse.tokenType())
-                .setExpiresIn(authResponse.expiresIn())
-                .setAccessToken(authResponse.accessToken())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        try {
+            com.example.auth.dto.LoginRequest loginRequest = new com.example.auth.dto.LoginRequest(
+                    request.getUsername(),
+                    request.getPassword()
+            );
+            com.example.auth.dto.AuthResponse authResponse = authService.login(loginRequest);
+            AuthResponse response = AuthResponse.newBuilder()
+                    .setAccessToken(authResponse.accessToken())
+                    .setRefreshToken(authResponse.refreshToken())
+                    .setTokenType(authResponse.tokenType())
+                    .setExpiresIn(authResponse.expiresIn())
+                    .setAccessToken(authResponse.accessToken())
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Status status = Status.INTERNAL.withDescription("Erro interno no servidor: " + e.getMessage());
+            responseObserver.onError(status.asRuntimeException());
+        }
     }
 
     @Override
