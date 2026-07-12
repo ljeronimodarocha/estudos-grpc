@@ -20,6 +20,7 @@
 		<module>contratos-grpc</module>
 		<module>Auth</module>
 		<module>User</module>
+		<module>Book</module>
 	</modules>
 
 	<properties>
