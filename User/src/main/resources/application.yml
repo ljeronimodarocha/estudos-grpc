@@ -2,6 +2,9 @@ server:
   port: 8083
 
 spring:
+  grpc:
+    server:
+      port: 9091
   datasource:
     url: jdbc:postgresql://localhost:5432/authentication_db
     username: your_username

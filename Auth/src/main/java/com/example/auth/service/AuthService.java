@@ -4,7 +4,7 @@ import com.example.auth.dto.*;
 import com.example.auth.model.Token;
 import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
-import com.example.grpc.user.UserResponse;
+import com.example.grpc.user.*;
 import com.example.grpc.user.UserServiceGrpc;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,22 +42,31 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        // Buscar usuário no User Service via gRPC
+        com.example.grpc.user.GetUserByUsernameRequest getUserRequest =
+            com.example.grpc.user.GetUserByUsernameRequest.newBuilder()
+                .setUsername(request.username())
+                .build();
+        
+        com.example.grpc.user.UserResponse userResponse = userGrpcStub.getUserByUsername(getUserRequest);
+
+        // Autenticar via Spring Security
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+            new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
-        UserDetails userDetails = userServiceAuth.loadUserByUsername(request.username());
+        // Buscar UserAuthentication para gerar tokens
         UserAuthentication userAuthentication = userServiceAuth.findByUsername(request.username());
 
-        String accessToken = jwtUtil.generateAccessToken(userDetails);
-        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        String accessToken = jwtUtil.generateAccessToken(userServiceAuth.loadUserByUsername(userAuthentication.getUsername()));
+        String refreshToken = jwtUtil.generateRefreshToken(userServiceAuth.loadUserByUsername(userAuthentication.getUsername()));
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
         return new AuthResponse(accessToken, refreshToken, "Bearer", accessTokenValiditySeconds);
     }
 
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResponse register(com.example.auth.dto.RegisterRequest request) {
         com.example.grpc.user.RegisterRequest userRequest = com.example.grpc.user.RegisterRequest.newBuilder()
                 .setUsername(request.username())
                 .setEmail(request.email())

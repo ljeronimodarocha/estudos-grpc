@@ -8,6 +8,8 @@ option java_package = "com.example.grpc.user";
 service UserService {
   rpc Register (RegisterRequest) returns (UserResponse);
   rpc GetUserById (GetUserByIdRequest) returns (UserResponse);
+  rpc GetUserByUsername (GetUserByUsernameRequest) returns (UserResponse);
+  rpc GetUserByIdentity (GetUserByIdentityRequest) returns (UserResponse);
 }
 
 message RegisterRequest {
@@ -25,6 +27,14 @@ message UserResponse{
 
 message GetUserByIdRequest {
   int32 id = 1;
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+message GetUserByIdentityRequest {
+  string userId = 1;
 }
 
 message Empty {}

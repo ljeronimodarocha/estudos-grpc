@@ -52,4 +52,13 @@ public class UserService {
     public boolean existsByName(String name) {
         return userRepository.existsByName(name);
     }
+
+    public User findByIdentity(String userId) {
+        try {
+            return userRepository.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid user ID format: " + userId, e);
+        }
+    }
 }
