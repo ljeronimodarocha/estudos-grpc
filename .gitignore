@@ -4,3 +4,6 @@
 /.github/
 /.project
 /.settings
+
+# Build artifacts
+*/target/
