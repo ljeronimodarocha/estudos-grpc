@@ -81,3 +81,8 @@
 - Never alter any dependency without authorization
 - Never alter already created tests
 - Always run tests after an implementation to validate everything is working
+- **All planning documents must be saved in `plans/` folder**
+  - Create/update planning files in `plans/[PROJECT]_PLAN.md`
+  - Update plan during execution to maintain development history
+  - Track progress, changes, and decisions in the plan file
+  - Example: `plans/TEST_COVERAGE_PLAN.md`, `plans/AUTH_SERVICE_PLAN.md`
