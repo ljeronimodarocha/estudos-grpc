@@ -6,6 +6,7 @@ import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
 import com.example.grpc.user.*;
 import com.example.grpc.user.UserServiceGrpc;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,15 +14,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
+@NoArgsConstructor
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserServiceAuth userServiceAuth;
-    private final TokenService tokenService;
-    private final JwtUtil jwtUtil;
-    private final long accessTokenValiditySeconds;
-    private final long refreshTokenValiditySeconds;
-    private final UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
+    private AuthenticationManager authenticationManager;
+    private UserServiceAuth userServiceAuth;
+    private TokenService tokenService;
+    private JwtUtil jwtUtil;
+    private long accessTokenValiditySeconds;
+    private long refreshTokenValiditySeconds;
+    private UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
 
     public AuthService(
             AuthenticationManager authenticationManager,
