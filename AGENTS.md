@@ -77,3 +77,7 @@
 
 ### Rules
 - Never commit before I validate only should recommend a message
+- Always use dependencies declared in the parent POM (`sistema-grpc-parent`); never add dependencies to sub-repositories without authorization
+- Never alter any dependency without authorization
+- Never alter already created tests
+- Always run tests after an implementation to validate everything is working
