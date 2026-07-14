@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+  web:
+    resources:
+      static-locations: classpath:/static/
+  security:
+    user:
+      name: testuser
+      password: testpassword
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  mvc:
+    async:
+      request-timeout: 30000
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+jwt:
+  secret-key: 401e12f35a6b8c7d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d
+  token-validity-seconds: 3600
+  refresh-token-validity-seconds: 86400
+
+logging:
+  level:
+    com.example.user: DEBUG
+    org.springframework.security: DEBUG
