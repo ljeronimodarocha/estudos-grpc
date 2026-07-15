@@ -30,6 +30,11 @@
 - Proto definitions centralized in `contratos-grpc/src/main/proto/`
 - Protobuf-Maven-Plugin for gRPC code generation
 - Jacoco configured for code coverage in all modules
+- Lombok: Each module using Lombok must include `maven-compiler-plugin` with Lombok annotation processor
+- JaCoCo exclusions per module:
+  - Auth: `**/*Config.class`, `com/example/grpc/auth/**/*.class`
+  - User: `**/*Config.class`, `com/example/grpc/user/**/*.class`
+  - Book: `**/*Config.class`, `com/example/bookapp/proto/**/*.class`
 
 ### Security Architecture
 - **Auth**: Central authentication service exposing gRPC endpoints for token validation
@@ -63,15 +68,18 @@
 - gRPC client address: Configured in application.yml (default: localhost:9090)
 
 ### Testing Summary
-- **Total Tests**: 29 passing tests
-  - **Auth Module**: 23 tests
+- **Total Tests**: 59 passing tests
+  - **Auth Module**: 27 tests
     - JwtUtilTest: 7 tests (JWT token generation, validation, username extraction)
     - UserRepositoryAuthenticationTest: 8 tests (user repository operations)
     - TokenRepositoryTest: 8 tests (token repository operations)
+    - UserServiceAuthTest: 4 tests
+  - **User Module**: 27 tests
+    - UserServiceTest: 13 tests (user service operations)
+    - GrpcServerServiceTest: 8 tests (gRPC server tests)
+    - UserControllerTest: 6 tests (REST controller tests)
   - **Book Module**: 5 tests
     - BookServiceImplTest: 5 tests (book service CRUD operations)
-  - **User Module**: 1 test
-    - UserServiceTest: 1 test (user service operations)
 - **JaCoCo Coverage**: Configured with 60% minimum threshold
 - **Test Resources**: Located in `src/test/resources/`
 
