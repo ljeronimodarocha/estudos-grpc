@@ -68,18 +68,23 @@
 - gRPC client address: Configured in application.yml (default: localhost:9090)
 
 ### Testing Summary
-- **Total Tests**: 59 passing tests
-  - **Auth Module**: 27 tests
+- **Total Tests**: 93 passing tests
+  - **Auth Module**: 54 tests
     - JwtUtilTest: 7 tests (JWT token generation, validation, username extraction)
     - UserRepositoryAuthenticationTest: 8 tests (user repository operations)
     - TokenRepositoryTest: 8 tests (token repository operations)
-    - UserServiceAuthTest: 4 tests
+    - AuthServiceTest: 11 tests (auth service operations)
+    - AuthControllerTest: 6 tests (REST controller tests)
+    - TokenServiceTest: 5 tests (token service operations)
+    - UserServiceAuthTest: 3 tests (user auth operations)
+    - DTO Tests: 6 tests (AuthResponse, LoginRequest, LogoutRequest, RefreshRequest, RegisterRequest, ValidateResponse)
   - **User Module**: 27 tests
     - UserServiceTest: 13 tests (user service operations)
     - GrpcServerServiceTest: 8 tests (gRPC server tests)
     - UserControllerTest: 6 tests (REST controller tests)
-  - **Book Module**: 5 tests
+  - **Book Module**: 12 tests
     - BookServiceImplTest: 5 tests (book service CRUD operations)
+    - BookControllerTest: 7 tests (REST controller tests)
 - **JaCoCo Coverage**: Configured with 60% minimum threshold
 - **Test Resources**: Located in `src/test/resources/`
 
