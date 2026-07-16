@@ -25,6 +25,13 @@
 			<plugin>
 				<groupId>io.github.ascopes</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
+				<configuration>
+					<protos>
+						<proto>src/main/proto/auth.proto</proto>
+						<proto>src/main/proto/user.proto</proto>
+						<proto>src/main/proto/book.proto</proto>
+					</protos>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
