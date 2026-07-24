@@ -19,13 +19,13 @@ import java.util.Objects;
 @Service
 public class AuthService {
 
-    private AuthenticationManager authenticationManager;
-    private UserServiceAuth userServiceAuth;
-    private TokenService tokenService;
-    private JwtUtil jwtUtil;
-    private long accessTokenValiditySeconds;
-    private long refreshTokenValiditySeconds;
-    private UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
+    private final AuthenticationManager authenticationManager;
+    private final UserServiceAuth userServiceAuth;
+    private final TokenService tokenService;
+    private final JwtUtil jwtUtil;
+    private final long accessTokenValiditySeconds;
+    private final long refreshTokenValiditySeconds;
+    private final UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
 
     public AuthService(
             AuthenticationManager authenticationManager,

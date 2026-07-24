@@ -2,6 +2,28 @@
 
 Multi-module Spring Boot application com gRPC para autenticação e gestão de livros.
 
+## 🛡️ Tratamento Centralizado de Erros
+
+O projeto implementa `GlobalExceptionHandler` com `@RestControllerAdvice` para tratamento consistente de exceções em todos os controllers:
+
+- `BadCredentialsException` → 401 "Invalid username or password"
+- `AuthenticationException` → 401 com mensagem da exceção
+- `AccessDeniedException` → 403 "Access denied"
+- `ExpiredJwtException` → 401 "Token has expired"
+- `RuntimeException` → 500 com mensagem da exceção
+- `Exception` → 500 "An unexpected error occurred" (fallback genérico)
+
+### Estrutura de Respostas
+
+Todas as respostas de erro seguem o padrão:
+```json
+{
+  "status": 401,
+  "message": "Invalid username or password",
+  "timestamp": "2026-07-24T23:35:25.285Z"
+}
+```
+
 ## 🤖 Desenvolvido com IA
 
 Este projeto foi desenvolvido e mantido pelo **opencode**, um agente de código baseado em **llama.cpp**, um modelo de IA local otimizado para execução eficiente em hardware local.
@@ -72,9 +94,10 @@ estudo/
 │   │   │   │   ├── repository/    # Data access
 │   │   │   │   ├── model/         # Entidades
 │   │   │   │   ├── dto/           # Data Transfer Objects
+│   │   │   │   ├── exception/     # Tratamento centralizado de erros
 │   │   │   │   └── util/          # Utilitários JWT
 │   │   │   └── resources/         # Configurações
-│   │   └── test/                  # Testes (23 testes)
+│   │   └── test/                  # Testes (54 testes)
 │   └── pom.xml
 ├── Book/                          # Módulo de livros
 │   ├── src/
@@ -242,6 +265,22 @@ service UserService {
 cd contratos-grpc
 mvn generate-sources
 ```
+
+### Tratamento de Erros gRPC
+
+As chamadas gRPC são protegidas com `try-catch` para capturar `StatusRuntimeException` e converter em respostas estruturadas:
+
+```java
+try {
+    userResponse = userGrpcStub.getUserByUsername(getUserRequest);
+} catch (Throwable t) {
+    throw handleGrpcError(t);
+}
+```
+
+O método `handleGrpcError()` converte exceções gRPC em mensagens amigáveis:
+- `StatusRuntimeException` → "User Service unavailable: [description]"
+- Outras exceções → "Failed to reach User Service"
 
 ---
 
