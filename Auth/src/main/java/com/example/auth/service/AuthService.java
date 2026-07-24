@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-@NoArgsConstructor
 public class AuthService {
 
     private AuthenticationManager authenticationManager;
@@ -30,8 +29,8 @@ public class AuthService {
             UserServiceAuth userServiceAuth,
             TokenService tokenService,
             JwtUtil jwtUtil,
-            @Value("${jwt.token-validity-seconds}") long accessTokenValiditySeconds,
-            @Value("${jwt.refresh-token-validity-seconds}") long refreshTokenValiditySeconds,
+            @Value("${jwt.token-validity-seconds}") Long accessTokenValiditySeconds,
+            @Value("${jwt.refresh-token-validity-seconds}") Long refreshTokenValiditySeconds,
             UserServiceGrpc.UserServiceBlockingStub userGrpcStub
     ) {
         this.authenticationManager = authenticationManager;
@@ -62,6 +61,8 @@ public class AuthService {
 
         String accessToken = jwtUtil.generateAccessToken(userServiceAuth.loadUserByUsername(userAuthentication.getUsername()));
         String refreshToken = jwtUtil.generateRefreshToken(userServiceAuth.loadUserByUsername(userAuthentication.getUsername()));
+
+        tokenService.revokeAllUserTokens(userAuthentication);
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 

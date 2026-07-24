@@ -1,18 +1,13 @@
 package com.example.auth.service;
 
-import com.example.auth.dto.AuthResponse;
-import com.example.auth.dto.LoginRequest;
-import com.example.auth.dto.RegisterRequest;
-import com.example.auth.dto.RefreshRequest;
-import com.example.auth.dto.LogoutRequest;
-import com.example.auth.model.UserAuthentication;
+import com.example.auth.dto.*;
 import com.example.auth.model.Token;
+import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
 import com.example.grpc.user.UserServiceGrpc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,13 +37,15 @@ class AuthServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    private static final long ACCESS_TOKEN_VALIDITY = 3600L;
+    private static final long REFRESH_TOKEN_VALIDITY = 86400L;
+
     @Mock
     private UserServiceGrpc.UserServiceBlockingStub userGrpcStub;
 
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
     private AuthService authService;
 
     private LoginRequest loginRequest;
@@ -57,11 +54,19 @@ class AuthServiceTest {
     private LogoutRequest logoutRequest;
     private UserAuthentication userAuthentication;
     private UserDetails userDetails;
-    private AuthResponse authResponse;
     private Token mockToken;
 
     @BeforeEach
     void setUp() {
+        authService = new AuthService(
+                authenticationManager,
+                userServiceAuth,
+                tokenService,
+                jwtUtil,
+                ACCESS_TOKEN_VALIDITY,
+                REFRESH_TOKEN_VALIDITY,
+                userGrpcStub
+        );
         loginRequest = new LoginRequest("testuser", "password123");
         registerRequest = new RegisterRequest("newuser", "newpassword", "email@test.com", "DisplayName");
         refreshRequest = new RefreshRequest("validRefreshToken");
@@ -76,7 +81,7 @@ class AuthServiceTest {
                 .disabled(false)
                 .build();
 
-        authResponse = new AuthResponse("accessToken", "refreshToken", "Bearer", 3600L);
+        AuthResponse authResponse = new AuthResponse("accessToken", "refreshToken", "Bearer", 3600L);
         mockToken = mock(Token.class);
     }
 

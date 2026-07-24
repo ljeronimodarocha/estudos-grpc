@@ -39,7 +39,7 @@ Este projeto foi desenvolvido e mantido pelo **opencode**, um agente de código 
 
 ### Backend
 - **Spring Boot 4.1.0** - Framework principal
-- **Java 21** - Versão LTS
+- **Java 26** - Versão LTS
 - **Maven** - Build system
 
 ### gRPC
@@ -112,7 +112,7 @@ estudo/
 
 ### Pré-requisitos
 
-- **Java 21** ou superior
+- **Java 26** ou superior
 - **Maven 3.6+**
 - **PostgreSQL** (opcional, para desenvolvimento)
 - **Redis** (opcional, para cache)
@@ -335,7 +335,7 @@ Este projeto está sob a licença MIT.
 - `jwt`
 - `authentication`
 - `multi-module`
-- `java-21`
+- `java-26`
 - `postgresql`
 - `redis`
 - `ai-assisted`

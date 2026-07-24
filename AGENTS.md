@@ -24,7 +24,7 @@
 ### Framework Quirks
 - Maven-based build system
 - Shared parent pom: `sistema-grpc-parent` (version 1.0.0)
-- Java version: 21
+- Java version: 26
 - Spring Boot version: 4.1.0
 - gRPC integration: All modules use `spring-boot-starter-grpc-server` and `spring-boot-starter-grpc-client`
 - Proto definitions centralized in `contratos-grpc/src/main/proto/`
@@ -63,7 +63,7 @@
 - PRs must have tests
 - Code formatting: Prettier (if configured)
 - Parent pom version: 1.0.0
-- Java version: 21
+- Java version: 26
 - Spring Boot version: 4.1.0
 - gRPC client address: Configured in application.yml (default: localhost:9090)
 
