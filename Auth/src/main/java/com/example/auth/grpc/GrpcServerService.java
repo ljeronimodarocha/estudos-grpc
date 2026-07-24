@@ -9,11 +9,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
 
 @GrpcService
-@RequiredArgsConstructor
 public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+
+    public GrpcServerService(AuthService authService, JwtUtil jwtUtil) {
+        this.authService = authService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public void login(LoginRequest request, StreamObserver<AuthResponse> responseObserver) {

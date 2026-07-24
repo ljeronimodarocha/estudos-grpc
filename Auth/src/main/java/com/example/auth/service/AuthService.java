@@ -4,14 +4,17 @@ import com.example.auth.dto.*;
 import com.example.auth.model.Token;
 import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
-import com.example.grpc.user.*;
+import com.example.grpc.user.UserResponse;
 import com.example.grpc.user.UserServiceGrpc;
-import lombok.NoArgsConstructor;
+import io.grpc.StatusRuntimeException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class AuthService {
@@ -42,14 +45,26 @@ public class AuthService {
         this.userGrpcStub = userGrpcStub;
     }
 
+    private RuntimeException handleGrpcError(Throwable t) {
+        if (t instanceof StatusRuntimeException e) {
+            return new RuntimeException("User Service unavailable: " + e.getStatus().getDescription(), e);
+        }
+        return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException("Failed to reach User Service", t);
+    }
+
     public AuthResponse login(LoginRequest request) {
         // Buscar usuário no User Service via gRPC
         com.example.grpc.user.GetUserByUsernameRequest getUserRequest =
             com.example.grpc.user.GetUserByUsernameRequest.newBuilder()
                 .setUsername(request.username())
                 .build();
-        
-        com.example.grpc.user.UserResponse userResponse = userGrpcStub.getUserByUsername(getUserRequest);
+
+        try {
+            com.example.grpc.user.UserResponse userResponse = userGrpcStub.getUserByUsername(getUserRequest);
+            if(Objects.isNull(userResponse)) throw new UsernameNotFoundException("User not found");
+        } catch (Throwable t) {
+            throw handleGrpcError(t);
+        }
 
         // Autenticar via Spring Security
         authenticationManager.authenticate(
@@ -76,7 +91,12 @@ public class AuthService {
                 .setDisplayName(request.displayName())
                 .build();
 
-        UserResponse registered = userGrpcStub.register(userRequest);
+        UserResponse registered;
+        try {
+            registered = userGrpcStub.register(userRequest);
+        } catch (Throwable t) {
+            throw handleGrpcError(t);
+        }
 
         UserAuthentication userAuthentication = userServiceAuth.registerUserAuthentication(request, (long) registered.getId());
         UserDetails userDetails = userServiceAuth.loadUserByUsername(userAuthentication.getUsername());
