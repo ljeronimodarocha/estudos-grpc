@@ -77,7 +77,7 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(accessToken, refreshToken, "Bearer", accessTokenValiditySeconds);
+        return new AuthResponse(accessTokenValiditySeconds);
     }
 
     public AuthResponse register(com.example.auth.dto.RegisterRequest request) {
@@ -102,7 +102,7 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(accessToken, refreshToken, "Bearer", accessTokenValiditySeconds);
+        return new AuthResponse(accessTokenValiditySeconds);
     }
 
     public AuthResponse refresh(RefreshRequest request) {
@@ -123,7 +123,7 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, newRefreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(newAccessToken, newRefreshToken, "Bearer", accessTokenValiditySeconds);
+        return new AuthResponse(accessTokenValiditySeconds);
     }
 
     public void logout(LogoutRequest request) {

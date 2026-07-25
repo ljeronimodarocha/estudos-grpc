@@ -81,7 +81,7 @@ class AuthServiceTest {
                 .disabled(false)
                 .build();
 
-        AuthResponse authResponse = new AuthResponse("accessToken", "refreshToken", "Bearer", 3600L);
+        AuthResponse authResponse = new AuthResponse(3600L);
         mockToken = mock(Token.class);
     }
 
@@ -104,9 +104,7 @@ class AuthServiceTest {
         AuthResponse result = authService.login(loginRequest);
 
         assertNotNull(result);
-        assertEquals("accessToken", result.accessToken());
-        assertEquals("refreshToken", result.refreshToken());
-        assertEquals("Bearer", result.tokenType());
+        assertEquals(3600L, result.expiresIn());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
@@ -161,8 +159,7 @@ class AuthServiceTest {
         AuthResponse result = authService.register(registerRequest);
 
         assertNotNull(result);
-        assertEquals("accessToken", result.accessToken());
-        assertEquals("refreshToken", result.refreshToken());
+        assertEquals(3600L, result.expiresIn());
         verify(userServiceAuth).registerUserAuthentication(eq(registerRequest), eq(1L));
     }
 
@@ -187,8 +184,7 @@ class AuthServiceTest {
         AuthResponse result = authService.refresh(refreshRequest);
 
         assertNotNull(result);
-        assertEquals("newAccessToken", result.accessToken());
-        assertEquals("newRefreshToken", result.refreshToken());
+        assertEquals(3600L, result.expiresIn());
         verify(tokenService).revokeAllUserTokens(any(UserAuthentication.class));
     }
 

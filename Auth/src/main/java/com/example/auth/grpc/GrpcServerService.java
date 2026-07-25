@@ -28,11 +28,7 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
             );
             com.example.auth.dto.AuthResponse authResponse = authService.login(loginRequest);
             AuthResponse response = AuthResponse.newBuilder()
-                    .setAccessToken(authResponse.accessToken())
-                    .setRefreshToken(authResponse.refreshToken())
-                    .setTokenType(authResponse.tokenType())
                     .setExpiresIn(authResponse.expiresIn())
-                    .setAccessToken(authResponse.accessToken())
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
