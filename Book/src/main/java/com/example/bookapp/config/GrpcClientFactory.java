@@ -3,11 +3,16 @@ package com.example.bookapp.config;
 import com.example.grpc.auth.AuthServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GrpcClientFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(GrpcClientFactory.class);
 
     @Value("${grpc.client.address:localhost:9090}")
     private String grpcAddress;
@@ -30,5 +35,13 @@ public class GrpcClientFactory {
                     .build();
         }
         return channel;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (channel != null) {
+            log.info("Shutting down gRPC channel for Auth service");
+            channel.shutdown();
+        }
     }
 }

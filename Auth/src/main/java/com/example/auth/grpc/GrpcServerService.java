@@ -1,11 +1,11 @@
 package com.example.auth.grpc;
 
+import com.example.auth.exception.GrpcExceptionHandler;
 import com.example.auth.service.AuthService;
 import com.example.auth.util.JwtUtil;
 import com.example.grpc.auth.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
 
 @GrpcService
@@ -37,8 +37,7 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            Status status = Status.INTERNAL.withDescription("Erro interno no servidor: " + e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+            responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
     }
 
@@ -75,8 +74,7 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
                 responseObserver.onError(status.asRuntimeException());
             }
         } catch (Exception e) {
-            Status status = Status.INTERNAL.withDescription("Erro ao validar token: " + e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+            responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
     }
 }

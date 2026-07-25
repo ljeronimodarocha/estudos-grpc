@@ -6,7 +6,7 @@ import com.example.auth.model.UserAuthentication;
 import com.example.auth.util.JwtUtil;
 import com.example.grpc.user.UserResponse;
 import com.example.grpc.user.UserServiceGrpc;
-import io.grpc.StatusRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static com.example.auth.exception.GrpcExceptionHandler.handleException;
+
 @Service
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -45,13 +48,6 @@ public class AuthService {
         this.userGrpcStub = userGrpcStub;
     }
 
-    private RuntimeException handleGrpcError(Throwable t) {
-        if (t instanceof StatusRuntimeException e) {
-            return new RuntimeException("User Service unavailable: " + e.getStatus().getDescription(), e);
-        }
-        return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException("Failed to reach User Service", t);
-    }
-
     public AuthResponse login(LoginRequest request) {
         // Buscar usuário no User Service via gRPC
         com.example.grpc.user.GetUserByUsernameRequest getUserRequest =
@@ -62,8 +58,8 @@ public class AuthService {
         try {
             com.example.grpc.user.UserResponse userResponse = userGrpcStub.getUserByUsername(getUserRequest);
             if(Objects.isNull(userResponse)) throw new UsernameNotFoundException("User not found");
-        } catch (Throwable t) {
-            throw handleGrpcError(t);
+        }  catch (Exception ex) {
+            throw handleException(ex);
         }
 
         // Autenticar via Spring Security
@@ -94,8 +90,8 @@ public class AuthService {
         UserResponse registered;
         try {
             registered = userGrpcStub.register(userRequest);
-        } catch (Throwable t) {
-            throw handleGrpcError(t);
+        } catch (Exception ex) {
+            throw handleException(ex);
         }
 
         UserAuthentication userAuthentication = userServiceAuth.registerUserAuthentication(request, (long) registered.getId());

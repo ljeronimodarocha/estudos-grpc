@@ -4,6 +4,7 @@ import com.example.grpc.user.GetUserByIdRequest;
 import com.example.grpc.user.RegisterRequest;
 import com.example.grpc.user.UserResponse;
 import com.example.grpc.user.UserServiceGrpc;
+import com.example.user.exception.GrpcExceptionHandler;
 import com.example.user.model.User;
 import com.example.user.service.UserService;
 import io.grpc.Status;
@@ -38,8 +39,7 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            Status status = Status.INTERNAL.withDescription("Erro interno no servidor: " + e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+            responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
     }
 
@@ -75,8 +75,7 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            Status status = Status.INTERNAL.withDescription("Erro ao buscar usuário por username: " + e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+            responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
     }
 
@@ -94,8 +93,7 @@ public class GrpcServerService extends UserServiceGrpc.UserServiceImplBase {
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            Status status = Status.INTERNAL.withDescription("Erro ao buscar usuário por IDENTITY: " + e.getMessage());
-            responseObserver.onError(status.asRuntimeException());
+            responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
     }
 
