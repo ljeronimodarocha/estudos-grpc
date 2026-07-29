@@ -10,12 +10,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -48,7 +51,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
             if (validateResponse.getValid()) {
                 String username = validateResponse.getUsername();
-                authenticateUser(request, username);
+                java.util.List<String> authorities = validateResponse.getAuthoritiesList().stream()
+                    .toList();
+                authenticateUser(request, username, authorities);
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
@@ -110,9 +115,12 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         }
     }
 
-    private void authenticateUser(HttpServletRequest request, String username) {
+    private void authenticateUser(HttpServletRequest request, String username, java.util.List<String> authorities) {
         log.info("Token validated successfully for user: {}", username);
-        var authToken = new UsernamePasswordAuthenticationToken(username, null);
+        Collection<? extends GrantedAuthority> grantedAuthorities = authorities.stream()
+            .map(SimpleGrantedAuthority::new)
+            .toList();
+        var authToken = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }

@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 import java.util.Collection;
-import java.util.Collections;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -38,9 +39,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = extractTokenFromCookie(request);
@@ -55,7 +56,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
             if (validateResponse.getValid()) {
                 String username = validateResponse.getUsername();
-                authenticateUser(request, username);
+                java.util.List<String> authorities = validateResponse.getAuthoritiesList().stream()
+                    .toList();
+                authenticateUser(request, username, authorities);
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
@@ -117,12 +120,12 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         }
     }
 
-    private void authenticateUser(HttpServletRequest request, String username) {
+    private void authenticateUser(HttpServletRequest request, String username, java.util.List<String> authorities) {
         log.info("Token validated successfully for user: {}", username);
-        Collection<? extends GrantedAuthority> authorities = Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_USER")
-        );
-        var authToken = new UsernamePasswordAuthenticationToken(username, null, authorities);
+        Collection<? extends GrantedAuthority> grantedAuthorities = authorities.stream()
+            .map(auth -> new SimpleGrantedAuthority(auth))
+            .toList();
+        var authToken = new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }

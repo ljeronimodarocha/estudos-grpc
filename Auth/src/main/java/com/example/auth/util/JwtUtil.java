@@ -55,6 +55,11 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
+    public java.util.List<String> extractRolesFromToken(String token) {
+        var claims = extractClaims(token);
+        return claims.get("roles", java.util.List.class);
+    }
+
     public boolean validateToken(String token) {
         try {
             extractClaims(token);

@@ -47,6 +47,7 @@ message AuthResponse {
 message ValidateResponse {
   bool valid = 1;
   string username = 2;
+  repeated string authorities = 3;
 }
 
 message Empty {}

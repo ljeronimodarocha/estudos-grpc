@@ -58,9 +58,11 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
             String token = request.getToken();
             if (jwtUtil.validateToken(token)) {
                 String username = jwtUtil.getUsernameFromToken(token);
+                java.util.List<String> authorities = extractAuthoritiesFromToken(token);
                 ValidateResponse response = ValidateResponse.newBuilder()
                     .setValid(true)
                     .setUsername(username)
+                    .addAllAuthorities(authorities)
                     .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
@@ -72,5 +74,9 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
         } catch (Exception e) {
             responseObserver.onError(GrpcExceptionHandler.handleException(e));
         }
+    }
+
+    private java.util.List<String> extractAuthoritiesFromToken(String token) {
+        return jwtUtil.extractRolesFromToken(token);
     }
 }
