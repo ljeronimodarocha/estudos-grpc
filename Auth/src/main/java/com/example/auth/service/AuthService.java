@@ -77,7 +77,7 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(accessTokenValiditySeconds);
+        return new AuthResponse(accessToken, refreshToken, accessTokenValiditySeconds);
     }
 
     public AuthResponse register(com.example.auth.dto.RegisterRequest request) {
@@ -102,17 +102,16 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, refreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(accessTokenValiditySeconds);
+        return new AuthResponse(accessToken, refreshToken, accessTokenValiditySeconds);
     }
 
-    public AuthResponse refresh(RefreshRequest request) {
-        String refreshTokenStr = request.refreshToken();
+    public AuthResponse refresh(String refreshToken) {
 
-        if (!tokenService.isTokenValid(refreshTokenStr)) {
+        if (!tokenService.isTokenValid(refreshToken)) {
             throw new RuntimeException("Invalid or expired refresh token");
         }
 
-        String username = jwtUtil.getUsernameFromToken(refreshTokenStr);
+        String username = jwtUtil.getUsernameFromToken(refreshToken);
         UserAuthentication userAuthentication = userServiceAuth.findByUsername(username);
 
         tokenService.revokeAllUserTokens(userAuthentication);
@@ -123,11 +122,11 @@ public class AuthService {
 
         tokenService.saveToken(userAuthentication, newRefreshToken, Token.TokenType.REFRESH, refreshTokenValiditySeconds);
 
-        return new AuthResponse(accessTokenValiditySeconds);
+        return new AuthResponse(newAccessToken, newRefreshToken, accessTokenValiditySeconds);
     }
 
-    public void logout(LogoutRequest request) {
-        tokenService.findByToken(request.refreshToken())
+    public void logout(String refreshToken) {
+        tokenService.findByToken(refreshToken)
                 .ifPresent(tokenService::revokeToken);
     }
 

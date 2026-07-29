@@ -70,6 +70,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("access_token".equals(cookie.getName())) {
+                    if (!isSecureCookie(cookie)) {
+                        log.warn("Cookie 'access_token' is not secure (missing HttpOnly or Secure flag)");
+                    }
                     log.debug("Found access_token in cookie");
                     return cookie.getValue();
                 }
@@ -95,6 +98,16 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             .build();
 
         return stub.validate(validateRequest);
+    }
+
+    private boolean isSecureCookie(Cookie cookie) {
+        try {
+            return Boolean.TRUE.equals(cookie.isHttpOnly())
+                && Boolean.TRUE.equals(cookie.getSecure());
+        } catch (Exception e) {
+            log.debug("Could not check cookie security attributes: {}", e.getMessage());
+            return true;
+        }
     }
 
     private void authenticateUser(HttpServletRequest request, String username) {

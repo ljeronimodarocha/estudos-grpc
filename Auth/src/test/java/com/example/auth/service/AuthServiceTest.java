@@ -81,7 +81,7 @@ class AuthServiceTest {
                 .disabled(false)
                 .build();
 
-        AuthResponse authResponse = new AuthResponse(3600L);
+        AuthResponse authResponse = new AuthResponse("accessToken", "refreshToken", 3600L);
         mockToken = mock(Token.class);
     }
 
@@ -181,7 +181,7 @@ class AuthServiceTest {
         doNothing().when(tokenService).revokeAllUserTokens(any(UserAuthentication.class));
         when(tokenService.saveToken(any(), any(), any(), anyLong())).thenReturn(mock(Token.class));
 
-        AuthResponse result = authService.refresh(refreshRequest);
+        AuthResponse result = authService.refresh(refreshRequest.refreshToken());
 
         assertNotNull(result);
         assertEquals(3600L, result.expiresIn());
@@ -192,14 +192,14 @@ class AuthServiceTest {
     void refresh_invalidToken() {
         when(tokenService.isTokenValid(anyString())).thenReturn(false);
 
-        assertThrows(RuntimeException.class, () -> authService.refresh(refreshRequest));
+        assertThrows(RuntimeException.class, () -> authService.refresh(refreshRequest.refreshToken()));
     }
 
     @Test
     void logout_success() {
         when(tokenService.findByToken(anyString())).thenReturn(Optional.of(mockToken));
 
-        authService.logout(logoutRequest);
+        authService.logout(logoutRequest.refreshToken());
 
         verify(tokenService).findByToken(anyString());
         verify(tokenService).revokeToken(any(Token.class));
@@ -209,7 +209,7 @@ class AuthServiceTest {
     void logout_noTokenFound() {
         when(tokenService.findByToken(anyString())).thenReturn(Optional.empty());
 
-        authService.logout(logoutRequest);
+        authService.logout(logoutRequest.refreshToken());
 
         verify(tokenService).findByToken(anyString());
         verify(tokenService, never()).revokeToken(any());

@@ -32,45 +32,51 @@ class AuthControllerTest {
     @Test
     void testLoginSuccess() {
         LoginRequest req = new LoginRequest("user", "pass");
-        AuthResponse resp = new AuthResponse(3600L);
+        AuthResponse resp = new AuthResponse("accessToken", "refreshToken", 3600L);
         when(authService.login(req)).thenReturn(resp);
         MockHttpServletResponse response = new MockHttpServletResponse();
         ResponseEntity<?> result = controller.login(req, response);
         assertNotNull(result);
         assertNotNull(result.getBody());
         assertEquals(3600L, ((Map<?,?>) result.getBody()).get("expiresIn"));
+        assertEquals("accessToken", response.getCookie("access_token").getValue());
+        assertEquals("refreshToken", response.getCookie("refresh_token").getValue());
     }
 
     @Test
     void testRegisterSuccess() {
         RegisterRequest req = new RegisterRequest("newuser", "pass123", "email@example.com", "New User");
-        AuthResponse resp = new AuthResponse(3600L);
+        AuthResponse resp = new AuthResponse("accessToken", "refreshToken", 3600L);
         when(authService.register(req)).thenReturn(resp);
         MockHttpServletResponse response = new MockHttpServletResponse();
         ResponseEntity<?> result = controller.register(req, response);
         assertNotNull(result);
         assertNotNull(result.getBody());
         assertEquals(3600L, ((Map<?,?>) result.getBody()).get("expiresIn"));
+        assertEquals("accessToken", response.getCookie("access_token").getValue());
+        assertEquals("refreshToken", response.getCookie("refresh_token").getValue());
     }
 
     @Test
     void testRefreshSuccess() {
         RefreshRequest req = new RefreshRequest("oldRefreshToken");
-        AuthResponse resp = new AuthResponse(3600L);
-        when(authService.refresh(req)).thenReturn(resp);
+        AuthResponse resp = new AuthResponse("newAccessToken", "newRefreshToken", 3600L);
+        when(authService.refresh(req.refreshToken())).thenReturn(resp);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        ResponseEntity<?> result = controller.refresh(req, response);
+        ResponseEntity<?> result = controller.refresh(req, null, response);
         assertNotNull(result);
         assertNotNull(result.getBody());
         assertEquals(3600L, ((Map<?,?>) result.getBody()).get("expiresIn"));
+        assertEquals("newAccessToken", response.getCookie("access_token").getValue());
+        assertEquals("newRefreshToken", response.getCookie("refresh_token").getValue());
     }
 
     @Test
     void testLogoutSuccess() {
         LogoutRequest req = new LogoutRequest("someRefreshToken");
-        doNothing().when(authService).logout(req);
+        doNothing().when(authService).logout("someRefreshToken");
         MockHttpServletResponse response = new MockHttpServletResponse();
-        ResponseEntity<Void> result = controller.logout(req, response);
+        ResponseEntity<?> result = controller.logout(req, null, response);
         assertNotNull(result);
     }
 

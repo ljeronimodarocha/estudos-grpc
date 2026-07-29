@@ -1,3 +1,3 @@
 package com.example.auth.dto;
 
-public record AuthResponse(long expiresIn) {}
+public record AuthResponse(String accessToken, String refreshToken, long expiresIn) {}
