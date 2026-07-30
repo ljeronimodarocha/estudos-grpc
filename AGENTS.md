@@ -68,7 +68,7 @@
 - gRPC client address: Configured in application.yml (default: localhost:9090)
 
 ### Testing Summary
-- **Total Tests**: 93 passing tests
+- **Total Tests**: 93 passing tests (100% passing)
   - **Auth Module**: 54 tests
     - JwtUtilTest: 7 tests (JWT token generation, validation, username extraction)
     - UserRepositoryAuthenticationTest: 8 tests (user repository operations)
@@ -87,6 +87,27 @@
     - BookControllerTest: 7 tests (REST controller tests)
 - **JaCoCo Coverage**: Configured with 60% minimum threshold
 - **Test Resources**: Located in `src/test/resources/`
+
+### Infrastructure (infra/)
+- `infra/` contains k3s test environment orchestration files
+- `docker-compose.k3s.yml` - Docker Compose for k3s server, agent, and app services
+- `deploy-k3s.sh` - Deploy script for k3s environment
+- `undeploy-k3s.sh` - Undeploy script for k3s environment
+- `build-apps.sh` - Build script for application Docker images
+- `k8s/` - Kubernetes manifests for deployments, statefulsets, services, ingress
+
+### Test Scripts
+- `generate-integration-tests.sh` - Generate integration tests with H2
+- `generate-all-tests.sh` - Generate all integration tests including Auth and Book controllers
+- Scripts create test files in `src/test/java/` and `application-integration.yml` config
+
+### Plans Directory
+- `plans/` contains planning documents for features and improvements
+- `K3S_TEST_ENVIRONMENT_PLAN.md` - k3s test environment architecture plan
+- `GLOBAL_EXCEPTION_HANDLER_PLAN.md` - Centralized error handling plan
+- `JWT_VALIDATION_FILTER_IMPROVEMENTS.md` - JWT validation improvements
+- `TOKEN_COOKIE_PLAN.md` - Token cookie implementation plan
+- `TEST_COVERAGE_PLAN.md` - Test coverage improvement plan
 
 ### Rules
 - **gRPC Protocol Buffers Architecture**: All proto-generated classes must remain in contratos-grpc only. Service modules (Auth, Book, User) import from com.example.grpc.* via Maven dependency. NEVER copy generated gRPC classes to service module source directories (Auth/src/main/java/com/example/grpc/*, Book/src/main/java/com/example/grpc/*, User/src/main/java/com/example/grpc/*). Proto definitions: contratos-grpc/src/main/proto/. Generated sources: contratos-grpc/target/generated-sources/protobuf/.

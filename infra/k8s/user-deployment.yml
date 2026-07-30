@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: user-app:latest
+        ports:
+        - containerPort: 8083
+        - containerPort: 9091
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-user:5434/user_db"
+        - name: AUTH_SERVICE_ADDRESS
+          value: "auth-grpc:9090"

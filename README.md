@@ -117,7 +117,7 @@ estudo/
 │   │   │   │   ├── service/
 │   │   │   │   └── grpc/
 │   │   │   └── resources/
-│   │   └── test/                  # Testes (1 teste)
+│   │   └── test/                  # Testes (27 testes)
 │   └── pom.xml
 ├── contratos-grpc/                # Definições gRPC
 │   ├── src/
@@ -125,7 +125,7 @@ estudo/
 │   │   │   └── proto/             # .proto files
 │   │   └── test/
 │   └── pom.xml
-├── sistema-grpc-parent/           # Parent POM
+├── sistema-grpc_parent/           # Parent POM
 └── AGENTS.md                       # Documentação do agente
 ```
 
@@ -179,6 +179,18 @@ docker-compose up -d
 mvn spring-boot:run
 ```
 
+### Scripts de Teste
+
+```bash
+# Gerar testes de integração (User)
+bash generate-integration-tests.sh
+
+# Gerar TODOS os testes de integração (Auth, Book)
+bash generate-all-tests.sh
+```
+
+Os scripts criam arquivos de teste em `src/test/java/` e configuram `application-integration.yml` para testes com H2.
+
 ---
 
 ## 🧪 Testes
@@ -212,10 +224,10 @@ mvn jacoco:report
 
 | Módulo | Testes | Status |
 |--------|--------|--------|
-| **Auth** | 23 | ✅ Passando |
+| **Auth** | 54 | ✅ Passando |
 | **Book** | 12 | ✅ Passando |
-| **User** | 1 | ✅ Passando |
-| **Total** | **36** | ✅ **100%** |
+| **User** | 27 | ✅ Passando |
+| **Total** | **93** | ✅ **100%** |
 
 ---
 
@@ -358,6 +370,42 @@ refactor: code refactoring
 3. Commit (`git commit -m 'feat: add AmazingFeature'`)
 4. Push (`git push origin feature/AmazingFeature`)
 5. Abra Pull Request
+
+---
+
+## 🐳 Infraestrutura (infra/)
+
+### k3s Test Environment
+- `infra/` - Arquivos de orquestração Docker e Kubernetes
+- `docker-compose.k3s.yml` - Docker Compose para k3s server, agent, e serviços de app
+- `deploy-k3s.sh` - Script para iniciar ambiente k3s
+- `undeploy-k3s.sh` - Script para remover ambiente k3s
+- `build-apps.sh` - Script para build de Docker images
+
+### Kubernetes Manifests
+- `infra/k8s/` - Manifests para deployments, statefulsets, services, ingress
+  - `auth-deployment.yml` - Auth service deployment
+  - `user-deployment.yml` - User service deployment
+  - `book-deployment.yml` - Book service deployment
+  - `postgres-auth.yml` - Auth DB statefulset
+  - `postgres-book.yml` - Book DB statefulset
+  - `postgres-user.yml` - User DB statefulset
+  - `redis.yml` - Redis deployment
+  - `ingress.yml` - Ingress controller config
+  - `auth-service.yml` - Auth service exposure
+  - `user-service.yml` - User service exposure
+
+---
+
+## 📋 Plans Directory
+
+### Documentos de Planejamento
+- `plans/` - Documentos de planejamento para features e melhorias
+- `K3S_TEST_ENVIRONMENT_PLAN.md` - Plano de arquitetura do ambiente k3s
+- `GLOBAL_EXCEPTION_HANDLER_PLAN.md` - Plano de tratamento centralizado de erros
+- `JWT_VALIDATION_FILTER_IMPROVEMENTS.md` - Melhorias de validação JWT
+- `TOKEN_COOKIE_PLAN.md` - Plano de implementação de token cookie
+- `TEST_COVERAGE_PLAN.md` - Plano de melhoria de cobertura de testes
 
 ---
 

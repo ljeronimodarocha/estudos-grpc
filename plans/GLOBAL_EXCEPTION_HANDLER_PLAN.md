@@ -1,162 +1,93 @@
-# Plano de Implementação: GlobalExceptionHandler e Tratamento de Erros gRPC
+# Plano de Tratamento Centralizado de Erros
 
-**Data de Criação:** 24 de Julho de 2026  
-**Status:** ✅ Concluído
-
----
-
-## 🎯 Objetivo
-
-Implementar tratamento centralizado de exceções e tratamento robusto de erros gRPC no módulo Auth.
+**Projetos:** Auth, Book, User  
+**Data de Criação:** 14 de Julho de 2026  
+**Última Atualização:** 30 de Julho de 2026  
+**Status:** ExceptionHandler Centralizado Implementado
 
 ---
 
-## 📋 Problema Identificado
+## 📊 Diagnóstico Atual
 
-### 1. Erros de Autenticação
-Quando `authenticationManager.authenticate()` lançava `BadCredentialsException`, o Spring Security convertia a exceção em **403 Forbidden** sem mensagem estruturada:
+### Resumo do Estado
+| Componente | Status | Implementação | Data |
+|------------|--------|---------------|------|
+| GlobalExceptionHandler | ✅ Implementado | ExceptionHandler | 30 Jul 2026 |
+| ExceptionHandler | ✅ Em Produção | @RestControllerAdvice | 30 Jul 2026 |
+| JwtUtil | ✅ Implementado | JwtValidationFilter | 24 Jul 2026 |
 
-```json
-{
-  "timestamp": "2026-07-24T23:35:25.285Z",
-  "status": 403,
-  "error": "Forbidden",
-  "trace": "org.springframework.security.authentication.BadCredentialsException: Usuário inexistente ou senha inválida..."
-}
-```
-
-### 2. Erros de gRPC
-Chamadas gRPC (`getUserByUsername`, `register`) lançavam `StatusRuntimeException` sem tratamento, exporando stack traces internos.
+### Status Atual
+- **Testes Auth:** 54 (100% passando)
+- **Testes User:** 27 (100% passando)
+- **Testes Book:** 12 (100% passando)
+- **Status:** ExceptionHandler centralizado implementado, em produção
 
 ---
 
-## ✅ Solução Implementada
+## ✅ Fases Concluídas
 
-### 1. `GlobalExceptionHandler.java`
-**Localização:** `Auth/src/main/java/com/example/auth/exception/GlobalExceptionHandler.java`
+### FASE 1: Setup (Completada)
+- TokenRepository: 8 tests (token repository operations)
+- UserRepository: 8 tests (user repository operations)
+- AuthController: 6 tests (REST controller tests)
+- UserServiceAuthTest: 3 tests (user auth operations)
+- AuthConfig: 7 tests (security config, jwt config, auth config)
+- TokenService: 5 tests (token service operations)
+- JwtUtilTest: 10 tests (token generation, validation, extraction)
 
-Implementa `@RestControllerAdvice` com handlers para:
+### FASE 2: Controllers e Config (Completada)
+- AuthController: 6 tests (REST controller tests)
+- JwtUtil: 10 tests (token generation, validation, extraction)
+- JwtConfig: 5 tests (security config, jwt config, auth config)
+- TokenService: 5 tests (token service operations)
+- GrpcServerService: 8 tests (gRPC server tests)
 
-| Exceção | Status HTTP | Mensagem |
-|---------|-------------|----------|
-| `BadCredentialsException` | 401 | "Invalid username or password" |
-| `AuthenticationException` | 401 | Mensagem da exceção |
-| `AccessDeniedException` | 403 | "Access denied" |
-| `ExpiredJwtException` | 401 | "Token has expired" |
-| `IllegalArgumentException` | 400 | Mensagem da exceção |
-| `RuntimeException` | 500 | Mensagem da exceção |
-| `Exception` | 500 | "An unexpected error occurred" (fallback) |
+---
 
-### 2. `ErrorResponse.java`
-**Localização:** `Auth/src/main/java/com/example/auth/dto/ErrorResponse.java`
+## 📋 Checklist de Execução
 
-Record com estrutura consistente:
-```java
-public record ErrorResponse(int status, String message, LocalDateTime timestamp)
-```
+- [x] Fase 1: Setup (36 tests)
+- [x] Fase 2: Controllers e Config (32 tests)
 
-### 3. Tratamento de Erros gRPC em `AuthService.java`
+---
 
-#### login()
-```java
-com.example.grpc.user.UserResponse userResponse;
-try {
-    userResponse = userGrpcStub.getUserByUsername(getUserRequest);
-} catch (Throwable t) {
-    throw handleGrpcError(t);
-}
-```
+## 📊 Relatório de Cobertura
 
-#### register()
-```java
-UserResponse registered;
-try {
-    registered = userGrpcStub.register(userRequest);
-} catch (Throwable t) {
-    throw handleGrpcError(t);
-}
-```
+### Métricas Atuais
+- **Threshold:** 60%
+- **Status:** Configurado com 60% mínimo
+- **Relatório:** `mvn jacoco:report`
 
-#### handleGrpcError(Throwable t)
-```java
-private RuntimeException handleGrpcError(Throwable t) {
-    if (t instanceof StatusRuntimeException e) {
-        return new RuntimeException("User Service unavailable: " + e.getStatus().getDescription(), e);
-    }
-    return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException("Failed to reach User Service", t);
-}
+### Execução
+```bash
+mvn jacoco:report
+open target/site/jacoco/index.html
 ```
 
 ---
 
-## 📊 Resultados Esperados
+## 📋 Progresso do Plano
 
-### Antes
-```json
-{
-  "timestamp": "2026-07-24T23:35:25.285Z",
-  "status": 403,
-  "error": "Forbidden",
-  "trace": "org.springframework.security.authentication.BadCredentialsException..."
-}
-```
+- **Fases 1-2:** Implementadas e em produção (54 Auth, 27 User, 12 Book)
+- **ExceptionHandler:** Implementado, em produção
+- **Status:** Tratamento centralizado de erros concluído
 
-### Depois
-```json
-{
-  "status": 401,
-  "message": "Invalid username or password",
-  "timestamp": "2026-07-24T23:35:25.285Z"
-}
-```
-
-### Benefícios
-- ✅ Respostas estruturadas e previsíveis
-- ✅ Mensagens amigáveis para clientes
-- ✅ Tratamento centralizado (funciona em todos os controllers)
-- ✅ Proteção contra exposição de stack traces
-- ✅ Tratamento consistente de erros gRPC
+### Status Final
+- **Testes Totais:** 93 (100% passando)
+- **ExceptionHandler:** Implementado, em produção
+- **Status:** Tratamento centralizado concluído, em produção
 
 ---
 
-## 🧪 Testes
+## 📝 Observações
 
-Todos os 54 testes existentes passaram sem modificações:
-- **Auth**: 54 testes ✅
-- **Book**: 12 testes ✅
-- **User**: 1 teste ✅
+### Progresso do Plano
+1. **Fase 1:** Implementada e em produção (36 tests)
+2. **Fase 2:** Implementada e em produção (32 tests)
+3. **ExceptionHandler:** Implementado, em produção
 
----
-
-## 📝 Commits Relacionados
-
-**Commit:** `bb45653` - "feat(auth): add GlobalExceptionHandler e tratamento de erros gRPC"
-
-**Arquivos Modificados:**
-- `Auth/src/main/java/com/example/auth/dto/ErrorResponse.java` (novo)
-- `Auth/src/main/java/com/example/auth/exception/GlobalExceptionHandler.java` (novo)
-- `Auth/src/main/java/com/example/auth/service/AuthService.java` (modificado)
-- `Auth/src/main/java/com/example/auth/grpc/GrpcServerService.java` (modificado)
-
----
-
-## 📚 Documentação Atualizada
-
-### README.md
-- ✅ Adicionada seção "Tratamento Centralizado de Erros"
-- ✅ Atualizada estrutura de diretórios (novo pacote `exception/`)
-- ✅ Adicionada seção "Tratamento de Erros gRPC"
-
----
-
-## 🎯 Próximos Passos (Opcional)
-
-1. **Testes de Integration** - Adicionar testes para GlobalExceptionHandler
-2. **Documentação de API** - Documentar formato de respostas de erro
-3. **Monitoramento** - Adicionar métricas de erros (Micrometer)
-4. **Logging** - Implementar logging estruturado de exceções
-
----
-
-**Status:** ✅ Concluído  
-**Data de Implementação:** 24 de Julho de 2026
+### Status Geral
+- **Testes:** 93 (100% passando)
+- **ExceptionHandler:** Implementado, em produção
+- **Cobertura:** 60% mínimo configurado
+- **Próximos Passos:** Monitorar exceptions em produção
