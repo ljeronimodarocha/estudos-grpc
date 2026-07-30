@@ -89,3 +89,32 @@ open target/site/jacoco/index.html
 - **k3s:** Implementado, em produção
 - **Cobertura:** 60% mínimo configurado
 - **Próximos Passos:** Monitorar performance do cluster
+---
+
+## 🔧 Correção Aplicada
+
+### Problema Identificado
+- **ImagePullBackOff/ErrImagePull**: Pods de serviço não encontravam imagens nos nodes k3d
+- **no main manifest attribute**: JARs construídos não tinham Main-Class no manifest
+
+### Causa Raiz
+1. k3d isola nodes em containers - imagens do Docker host não são compartilhadas automaticamente
+2. `imagePullPolicy: Always` forçava pull de registry externo
+3. spring-boot-maven-plugin estava apenas em `<pluginManagement>`, não ativado para filhos
+4. Auth e Book não declaravam plugin em `<plugins>` - não herdavam repackage do parent
+
+### Solução Aplicada
+1. **deploy-k3s.sh**: Adicionado `k3d image load` para carregar imagens nos nodes
+2. **k8s/*-deployment.yml**: Trocado `imagePullPolicy: Always` → `Never`
+3. **Auth/pom.xml, Book/pom.xml**: Adicionado build section com spring-boot-maven-plugin
+4. **pom.xml (parent)**: Adicionado repackage execution ao spring-boot-maven-plugin
+
+### Status Após Correção
+- **auth-service**: Running (1/1) ✅
+- **book-service**: Running (1/1) ✅
+- **user-service**: Running (1/1) ✅
+- **postgres-auth, postgres-book, postgres-user, redis**: Running ✅
+
+---
+
+*Documento gerado e mantido por opencode*

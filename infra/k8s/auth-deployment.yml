@@ -15,6 +15,7 @@ spec:
       containers:
       - name: auth
         image: auth-app:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8082
         - containerPort: 9090

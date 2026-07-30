@@ -15,6 +15,7 @@ spec:
       containers:
       - name: user
         image: user-app:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8083
         - containerPort: 9091

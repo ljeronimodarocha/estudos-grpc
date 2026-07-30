@@ -19,6 +19,10 @@ fi
 echo "⏳ Aguardando k3d iniciar..."
 sleep 5
 
+# Carregar imagens no cluster k3d
+echo "📦 Carregando imagens no cluster..."
+k3d image load auth-app:latest user-app:latest book-app:latest --cluster k3s-test
+
 # Aplicar manifests Kubernetes
 echo "📋 Aplicando manifests Kubernetes..."
 kubectl apply -f ./infra/k8s/

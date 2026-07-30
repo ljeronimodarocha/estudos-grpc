@@ -316,6 +316,34 @@ tail -f target/*.log
 
 ## 🐳 Docker
 
+## 🐳 Deploy k3s
+
+### Passos de Deploy
+
+```bash
+# 1. Construir imagens
+./infra/build-apps.sh
+
+# 2. Carregar imagens no cluster k3d
+k3d image load auth-app:latest user-app:latest book-app:latest --cluster k3s-test
+
+# 3. Aplicar manifests Kubernetes
+kubectl apply -f ./infra/k8s/
+
+# 4. Restart deployments
+kubectl rollout restart deployment auth-service book-service user-service
+```
+
+### imagePullPolicy
+
+Os manifests de deployment usam `imagePullPolicy: Never` para utilizar imagens carregadas localmente nos nodes do cluster k3d. Isso evita tentativas de pull de registry externo.
+
+### Problema Resolvido
+
+- **ImagePullBackOff**: k3d nodes não compartilham imagens do Docker host automaticamente
+- **no main manifest attribute**: Auth e Book não herdavam spring-boot-maven-plugin do parent pom
+- **Solução**: Adicionado plugin em Auth/Book pom.xml; `imagePullPolicy: Never` nos manifests; `k3d image load` no deploy script
+
 ### Docker Compose
 
 ```yaml
