@@ -48,6 +48,7 @@ message ValidateResponse {
   bool valid = 1;
   string username = 2;
   repeated string authorities = 3;
+  int64 userId = 4;
 }
 
 message Empty {}

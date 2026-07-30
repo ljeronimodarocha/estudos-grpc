@@ -52,4 +52,10 @@ public interface ValidateResponseOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAuthoritiesBytes(int index);
+
+  /**
+   * <code>int64 userId = 4;</code>
+   * @return The userId.
+   */
+  long getUserId();
 }

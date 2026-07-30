@@ -83,18 +83,19 @@ class AuthControllerTest {
     @Test
     void testValidateTokenValid() {
         String token = "validToken123";
-        ValidateResponse resp = new ValidateResponse(true, "username");
+        ValidateResponse resp = new ValidateResponse(true, "username", 1L);
         when(authService.validateToken(token)).thenReturn(resp);
         ResponseEntity<ValidateResponse> result = controller.validate(token);
         assertNotNull(result);
         assertEquals(true, result.getBody().valid());
         assertEquals("username", result.getBody().username());
+        assertEquals(1L, result.getBody().userId());
     }
 
     @Test
     void testValidateTokenInvalid() {
         String token = "invalidToken";
-        ValidateResponse resp = new ValidateResponse(false, null);
+        ValidateResponse resp = new ValidateResponse(false, null, null);
         when(authService.validateToken(token)).thenReturn(resp);
         ResponseEntity<ValidateResponse> result = controller.validate(token);
         assertNotNull(result);

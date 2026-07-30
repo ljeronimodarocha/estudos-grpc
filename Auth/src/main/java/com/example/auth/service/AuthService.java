@@ -133,9 +133,12 @@ public class AuthService {
     public ValidateResponse validateToken(String token) {
         boolean valid = jwtUtil.validateToken(token);
         String username = null;
+        Long userId = null;
         if (valid) {
             username = jwtUtil.getUsernameFromToken(token);
+            UserAuthentication userAuth = userServiceAuth.findByUsername(username);
+            userId = userAuth.getUserId();
         }
-        return new ValidateResponse(valid, username);
+        return new ValidateResponse(valid, username, userId);
     }
 }

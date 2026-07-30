@@ -3,13 +3,14 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bookdb
-    username: your_username
-    password: your_password
+    url: jdbc:postgresql://localhost:5433/book-postgres
+    username: authuser
+    password: authpass
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       use-new-id-generator-mappings: false
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

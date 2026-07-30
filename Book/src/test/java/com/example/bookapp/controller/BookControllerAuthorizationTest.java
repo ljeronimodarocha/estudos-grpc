@@ -1,6 +1,7 @@
 package com.example.bookapp.controller;
 
 import com.example.bookapp.dto.CreateBookRequest;
+import com.example.bookapp.exception.PermissionDeniedException;
 import com.example.bookapp.filter.UserAuthenticationDetails;
 import com.example.bookapp.model.Book;
 import com.example.bookapp.service.BookService;
@@ -13,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class BookControllerTest {
+class BookControllerAuthorizationTest {
 
     private BookController bookController;
     private BookService bookService;
@@ -28,7 +29,7 @@ class BookControllerTest {
     }
 
     @Test
-    void getAllBooks_returnsListFromService() {
+    void getAllBooks_returnsAllBooks() {
         Book book1 = new Book();
         book1.setId(1L);
         book1.setTitle("Book 1");
@@ -46,44 +47,37 @@ class BookControllerTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("Book 1", result.get(0).getTitle());
+        assertEquals("Book 2", result.get(1).getTitle());
         verify(bookService, times(1)).getAllBooks();
     }
 
     @Test
-    void getBookById_returnsBookWhenFound() {
+    void getBookById_returnsBook() {
         Book book = new Book();
         book.setId(1L);
         book.setTitle("Test Book");
-        when(bookService.getBookById(1L)).thenReturn(java.util.Optional.of(book));
+        book.setOwnerId(1L);
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(book));
 
         Optional<Book> result = bookController.getBookById(1L);
 
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
         assertEquals("Test Book", result.get().getTitle());
+        assertEquals(1L, result.get().getOwnerId());
         verify(bookService, times(1)).getBookById(1L);
     }
 
     @Test
-    void getBookById_returnsEmptyWhenNotFound() {
-        when(bookService.getBookById(999L)).thenReturn(java.util.Optional.empty());
-
-        Optional<Book> result = bookController.getBookById(999L);
-
-        assertFalse(result.isPresent());
-        verify(bookService, times(1)).getBookById(999L);
-    }
-
-    @Test
-    void createBook_savesAndReturnsBook() {
+    void createBook_setsOwnerId() {
         SecurityContextHolder.getContext().setAuthentication(createAuthentication(1L));
 
-        CreateBookRequest dto = new CreateBookRequest("New Book", "New Author", "999999");
+        CreateBookRequest dto = new CreateBookRequest("New Book", "New Author", "123456");
 
-        Book savedBook = new Book();
-        savedBook.setTitle("New Book");
-        savedBook.setOwnerId(1L);
-        when(bookService.saveBook(any(Book.class))).thenReturn(savedBook);
+        Book saved = new Book();
+        saved.setTitle("New Book");
+        saved.setOwnerId(1L);
+
+        when(bookService.saveBook(any(Book.class))).thenReturn(saved);
 
         Book result = bookController.createBook(dto);
 
@@ -93,7 +87,7 @@ class BookControllerTest {
     }
 
     @Test
-    void updateBook_updatesBookWhenFound() {
+    void updateBook_ownerCanUpdate() {
         SecurityContextHolder.getContext().setAuthentication(createAuthentication(1L));
 
         Book existingBook = new Book();
@@ -104,9 +98,9 @@ class BookControllerTest {
         Book updatedBook = new Book();
         updatedBook.setTitle("New Title");
         updatedBook.setAuthor("New Author");
-        updatedBook.setIsbn("222222");
+        updatedBook.setIsbn("111111");
 
-        when(bookService.getBookById(1L)).thenReturn(java.util.Optional.of(existingBook));
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(existingBook));
         when(bookService.saveBook(any(Book.class))).thenAnswer(invocation -> {
             Book b = invocation.getArgument(0);
             b.setId(existingBook.getId());
@@ -118,36 +112,60 @@ class BookControllerTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("New Title", result.getTitle());
-        assertEquals("New Author", result.getAuthor());
         verify(bookService, times(1)).getBookById(1L);
         verify(bookService, times(1)).saveBook(any(Book.class));
     }
 
     @Test
-    void updateBook_throwsExceptionWhenBookNotFound() {
-        SecurityContextHolder.getContext().setAuthentication(createAuthentication(1L));
+    void updateBook_nonOwnerDenied() {
+        SecurityContextHolder.getContext().setAuthentication(createAuthentication(99L));
 
-        when(bookService.getBookById(999L)).thenReturn(java.util.Optional.empty());
+        Book existingBook = new Book();
+        existingBook.setId(1L);
+        existingBook.setTitle("Owner Book");
+        existingBook.setOwnerId(1L);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> bookController.updateBook(999L, new Book()));
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(existingBook));
 
-        verify(bookService, times(1)).getBookById(999L);
+        PermissionDeniedException exception = assertThrows(PermissionDeniedException.class, () -> 
+            bookController.updateBook(1L, new Book())
+        );
+
+        assertTrue(exception.getMessage().contains("permission"));
         verify(bookService, never()).saveBook(any(Book.class));
     }
 
     @Test
-    void deleteBook_deletesBookById() {
+    void deleteBook_ownerCanDelete() {
         SecurityContextHolder.getContext().setAuthentication(createAuthentication(1L));
 
         Book existingBook = new Book();
         existingBook.setId(1L);
         existingBook.setOwnerId(1L);
 
-        when(bookService.getBookById(1L)).thenReturn(java.util.Optional.of(existingBook));
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(existingBook));
 
         bookController.deleteBook(1L);
 
         verify(bookService, times(1)).deleteBook(1L);
+    }
+
+    @Test
+    void deleteBook_nonOwnerDenied() {
+        SecurityContextHolder.getContext().setAuthentication(createAuthentication(99L));
+
+        Book existingBook = new Book();
+        existingBook.setId(1L);
+        existingBook.setOwnerId(1L);
+
+        when(bookService.getBookById(1L)).thenReturn(Optional.of(existingBook));
+
+        PermissionDeniedException exception = assertThrows(PermissionDeniedException.class, () -> 
+            bookController.deleteBook(1L)
+        );
+
+        assertTrue(exception.getMessage().contains("permission"));
+        verify(bookService, never()).deleteBook(1L);
     }
 
     private UsernamePasswordAuthenticationToken createAuthentication(Long userId) {

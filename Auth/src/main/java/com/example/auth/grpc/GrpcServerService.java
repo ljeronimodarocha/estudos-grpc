@@ -1,7 +1,9 @@
 package com.example.auth.grpc;
 
 import com.example.auth.exception.GrpcExceptionHandler;
+import com.example.auth.model.UserAuthentication;
 import com.example.auth.service.AuthService;
+import com.example.auth.service.UserServiceAuth;
 import com.example.auth.util.JwtUtil;
 import com.example.grpc.auth.*;
 import io.grpc.Status;
@@ -12,10 +14,12 @@ import org.springframework.grpc.server.service.GrpcService;
 public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
 
     private final AuthService authService;
+    private final UserServiceAuth userServiceAuth;
     private final JwtUtil jwtUtil;
 
-    public GrpcServerService(AuthService authService, JwtUtil jwtUtil) {
+    public GrpcServerService(AuthService authService, UserServiceAuth userServiceAuth, JwtUtil jwtUtil) {
         this.authService = authService;
+        this.userServiceAuth = userServiceAuth;
         this.jwtUtil = jwtUtil;
     }
 
@@ -58,17 +62,19 @@ public class GrpcServerService extends AuthServiceGrpc.AuthServiceImplBase {
             String token = request.getToken();
             if (jwtUtil.validateToken(token)) {
                 String username = jwtUtil.getUsernameFromToken(token);
+                UserAuthentication byUsername = userServiceAuth.findByUsername(username);
                 java.util.List<String> authorities = extractAuthoritiesFromToken(token);
                 ValidateResponse response = ValidateResponse.newBuilder()
-                    .setValid(true)
-                    .setUsername(username)
-                    .addAllAuthorities(authorities)
-                    .build();
+                        .setValid(true)
+                        .setUsername(username)
+                        .addAllAuthorities(authorities)
+                        .setUserId(byUsername.getId())
+                        .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             } else {
                 Status status = Status.UNAUTHENTICATED
-                    .withDescription("Token inválido ou expirado");
+                        .withDescription("Token inválido ou expirado");
                 responseObserver.onError(status.asRuntimeException());
             }
         } catch (Exception e) {

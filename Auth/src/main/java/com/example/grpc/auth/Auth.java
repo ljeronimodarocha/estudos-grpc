@@ -84,22 +84,22 @@ public final class Auth extends com.google.protobuf.GeneratedFile {
       "esh_token\030\001 \001(\t\"%\n\024ValidateTokenRequest\022" +
       "\r\n\005token\030\001 \001(\t\"c\n\014AuthResponse\022\024\n\014access" +
       "_token\030\001 \001(\t\022\025\n\rrefresh_token\030\002 \001(\t\022\022\n\nt" +
-      "oken_type\030\003 \001(\t\022\022\n\nexpires_in\030\004 \001(\003\"H\n\020V" +
+      "oken_type\030\003 \001(\t\022\022\n\nexpires_in\030\004 \001(\003\"X\n\020V" +
       "alidateResponse\022\r\n\005valid\030\001 \001(\010\022\020\n\010userna" +
-      "me\030\002 \001(\t\022\023\n\013authorities\030\003 \003(\t\"\007\n\005Empty2\300" +
-      "\003\n\013AuthService\022Q\n\005Login\022#.com.example.gr" +
-      "pc.auth.LoginRequest\032#.com.example.grpc." +
-      "auth.AuthResponse\022W\n\010Register\022&.com.exam" +
-      "ple.grpc.auth.RegisterRequest\032#.com.exam" +
-      "ple.grpc.auth.AuthResponse\022U\n\007Refresh\022%." +
-      "com.example.grpc.auth.RefreshRequest\032#.c" +
-      "om.example.grpc.auth.AuthResponse\022L\n\006Log" +
-      "out\022$.com.example.grpc.auth.LogoutReques" +
-      "t\032\034.com.example.grpc.auth.Empty\022`\n\010Valid" +
-      "ate\022+.com.example.grpc.auth.ValidateToke" +
-      "nRequest\032\'.com.example.grpc.auth.Validat" +
-      "eResponseB\031\n\025com.example.grpc.authP\001b\006pr" +
-      "oto3"
+      "me\030\002 \001(\t\022\023\n\013authorities\030\003 \003(\t\022\016\n\006userId\030" +
+      "\004 \001(\003\"\007\n\005Empty2\300\003\n\013AuthService\022Q\n\005Login\022" +
+      "#.com.example.grpc.auth.LoginRequest\032#.c" +
+      "om.example.grpc.auth.AuthResponse\022W\n\010Reg" +
+      "ister\022&.com.example.grpc.auth.RegisterRe" +
+      "quest\032#.com.example.grpc.auth.AuthRespon" +
+      "se\022U\n\007Refresh\022%.com.example.grpc.auth.Re" +
+      "freshRequest\032#.com.example.grpc.auth.Aut" +
+      "hResponse\022L\n\006Logout\022$.com.example.grpc.a" +
+      "uth.LogoutRequest\032\034.com.example.grpc.aut" +
+      "h.Empty\022`\n\010Validate\022+.com.example.grpc.a" +
+      "uth.ValidateTokenRequest\032\'.com.example.g" +
+      "rpc.auth.ValidateResponseB\031\n\025com.example" +
+      ".grpc.authP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -146,7 +146,7 @@ public final class Auth extends com.google.protobuf.GeneratedFile {
     internal_static_com_example_grpc_auth_ValidateResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_com_example_grpc_auth_ValidateResponse_descriptor,
-        new java.lang.String[] { "Valid", "Username", "Authorities", });
+        new java.lang.String[] { "Valid", "Username", "Authorities", "UserId", });
     internal_static_com_example_grpc_auth_Empty_descriptor =
       getDescriptor().getMessageType(7);
     internal_static_com_example_grpc_auth_Empty_fieldAccessorTable = new

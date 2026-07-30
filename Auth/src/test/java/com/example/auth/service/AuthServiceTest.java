@@ -219,12 +219,19 @@ class AuthServiceTest {
     void validateToken_validToken() {
         when(jwtUtil.validateToken(anyString())).thenReturn(true);
         when(jwtUtil.getUsernameFromToken(anyString())).thenReturn("testuser");
+        
+        com.example.auth.model.UserAuthentication userAuth = new com.example.auth.model.UserAuthentication();
+        userAuth.setUsername("testuser");
+        userAuth.setPassword("password");
+        userAuth.setUserId(1L);
+        when(userServiceAuth.findByUsername("testuser")).thenReturn(userAuth);
 
         var result = authService.validateToken("validToken");
 
         assertNotNull(result);
         assertTrue(result.valid());
         assertEquals("testuser", result.username());
+        assertEquals(1L, result.userId());
     }
 
     @Test

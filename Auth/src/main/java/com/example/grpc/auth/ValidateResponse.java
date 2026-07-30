@@ -138,6 +138,17 @@ private static final long serialVersionUID = 0L;
     return authorities_.getByteString(index);
   }
 
+  public static final int USERID_FIELD_NUMBER = 4;
+  private long userId_ = 0L;
+  /**
+   * <code>int64 userId = 4;</code>
+   * @return The userId.
+   */
+  @java.lang.Override
+  public long getUserId() {
+    return userId_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -160,6 +171,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < authorities_.size(); i++) {
       com.google.protobuf.GeneratedMessage.writeString(output, 3, authorities_.getRaw(i));
+    }
+    if (userId_ != 0L) {
+      output.writeInt64(4, userId_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -185,6 +199,10 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getAuthoritiesList().size();
     }
+    if (userId_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(4, userId_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -206,6 +224,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getUsername())) return false;
     if (!getAuthoritiesList()
         .equals(other.getAuthoritiesList())) return false;
+    if (getUserId()
+        != other.getUserId()) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -226,6 +246,9 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + AUTHORITIES_FIELD_NUMBER;
       hash = (53 * hash) + getAuthoritiesList().hashCode();
     }
+    hash = (37 * hash) + USERID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getUserId());
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -361,6 +384,7 @@ private static final long serialVersionUID = 0L;
       username_ = "";
       authorities_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
+      userId_ = 0L;
       return this;
     }
 
@@ -404,6 +428,9 @@ private static final long serialVersionUID = 0L;
         authorities_.makeImmutable();
         result.authorities_ = authorities_;
       }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.userId_ = userId_;
+      }
     }
 
     @java.lang.Override
@@ -435,6 +462,9 @@ private static final long serialVersionUID = 0L;
           authorities_.addAll(other.authorities_);
         }
         onChanged();
+      }
+      if (other.getUserId() != 0L) {
+        setUserId(other.getUserId());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -477,6 +507,11 @@ private static final long serialVersionUID = 0L;
               authorities_.add(input.readStringRequireUtf8());
               break;
             } // case 26
+            case 32: {
+              userId_ = input.readInt64();
+              bitField0_ |= 0x00000008;
+              break;
+            } // case 32
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -705,6 +740,38 @@ private static final long serialVersionUID = 0L;
       ensureAuthoritiesIsMutable();
       authorities_.add(value);
       bitField0_ |= 0x00000004;
+      onChanged();
+      return this;
+    }
+
+    private long userId_ ;
+    /**
+     * <code>int64 userId = 4;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public long getUserId() {
+      return userId_;
+    }
+    /**
+     * <code>int64 userId = 4;</code>
+     * @param value The userId to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUserId(long value) {
+
+      userId_ = value;
+      bitField0_ |= 0x00000008;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 userId = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUserId() {
+      bitField0_ = (bitField0_ & ~0x00000008);
+      userId_ = 0L;
       onChanged();
       return this;
     }
